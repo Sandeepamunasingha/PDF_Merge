@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Merge PDFs</title>
+    <style>
+        /* General body styles */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #FF5733, #FFBD33, #75FF33, #33FFBD, #3375FF, #BD33FF, #FF33A2);
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            background: #000000;
+            
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 1000px;
+            height:500px
+            
+        }
+
+        h1 {
+            color:#FFFAF0;
+            margin-bottom: 2rem;
+            font-size: 4rem;
+            
+            
+            
+        }
+
+        .file-input label {
+            background-color: #5568e6;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .combine-btn {
+            background-color: #5568e6;
+            color: #fff;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .combine-btn:hover {
+            background-color: #800000;
+        }
+
+        #file-list {
+            text-align: left;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .loading-circle {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #5568e6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin: 20px auto;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        p {
+            color: white;
+        }
+        
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Merge PDF</h1>
+        <p>Upload your PDF files and combine them into a single document.</p>
+        <form id="upload-form" action="/combine" method="post" enctype="multipart/form-data">
+            <div class="file-input">
+                <input type="file" name="pdf_files" id="pdf_files" multiple required onchange="displayFileNames()">
+                <label for="pdf_files">Choose PDF Files</label>
+            </div>
+            <div id="file-list"></div>
+            <button type="submit" class="combine-btn">Combine PDFs</button>
+        </form>
+        <div id="loading" class="loading-circle"></div>
+    </div>
+
+    <script>
+        function displayFileNames() {
+            const fileList = document.getElementById('file-list');
+            const files = document.getElementById('pdf_files').files;
+            fileList.innerHTML = '';
+            for (let i = 0; i < files.length; i++) {
+                const fileItem = document.createElement('p');
+                fileItem.textContent = files[i].name;
+                fileList.appendChild(fileItem);
+            }
+        }
+
+        // Show loading animation on form submit and stop it after response
+        const form = document.getElementById('upload-form');
+        const loadingCircle = document.getElementById('loading');
+
+        form.addEventListener('submit', function (event) {
+            loadingCircle.style.display = 'block'; // Show loading circle when form is submitted
+
+            // Send the form data via AJAX
+            event.preventDefault();
+            const formData = new FormData(form);
+
+            fetch('/combine', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                loadingCircle.style.display = 'none'; // Hide loading circle once the response is received
+
+                // Trigger file download
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = "combined.pdf";
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            })
+            .catch(error => {
+                loadingCircle.style.display = 'none'; // Hide loading circle on error
+                console.error('Error merging PDFs:', error);
+                alert('An error occurred while merging the PDFs. Please try again.');
+            });
+        });
+    </script>
+</body>
+</html>

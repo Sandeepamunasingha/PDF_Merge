@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to SandeepMerge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to SandeepMerge</h1>
+        <p>Simply upload your PDF files for merge.</p>
+        <a href="{{ url_for('merge_page') }}" class="merge-button">Click here to merge</a>
+    </div>
+</body>
+</html>
